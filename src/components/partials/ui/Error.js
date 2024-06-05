@@ -1,4 +1,4 @@
-import { Target } from "../../Target.js";
+import { Target } from "@components/Target";
 
 class Error extends Target {
   constructor(props, container) {

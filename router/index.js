@@ -1,4 +1,4 @@
-import { pathToTargetId } from "./router.js";
+import { pathToTargetId } from "@router/router";
 
 /**
  * Page path to target ID mapping.

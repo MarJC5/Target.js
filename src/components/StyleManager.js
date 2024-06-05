@@ -1,5 +1,3 @@
-import { publicPath, urlPath } from '../../utils/index.js';
-
 export class StyleManager {
     constructor() {
         this.styles = new Map();
@@ -68,7 +66,7 @@ export class StyleManager {
 
         const styleElement = document.createElement('link');
         styleElement.rel = 'stylesheet';
-        styleElement.href = urlPath(publicPath(filename));
+        styleElement.href = new URL(filename, import.meta.url).href;
         styleElement.setAttribute('data-style-key', filename);
         document.head.appendChild(styleElement);
         this.injectedLinks.add(styleElement.href);
@@ -79,7 +77,7 @@ export class StyleManager {
      * @param {string} filename - The name of the CSS file to remove.
      */
     removeLinkedStyle(filename) {
-        const href = urlPath(publicPath(filename));
+        const href = new URL(filename, import.meta.url).href;
         const styleElement = document.querySelector(`link[data-style-key="${filename}"]`);
         if (styleElement) {
             document.head.removeChild(styleElement);
@@ -136,7 +134,7 @@ export class StyleManager {
      * @returns {boolean} - A boolean indicating whether the linked stylesheet is already loaded.
      */
     isLinkedStyleLoaded(filename) {
-        const href = urlPath(publicPath(filename));
+        const href = new URL(filename, import.meta.url).href;
         return this.injectedLinks.has(href) || document.querySelector(`link[data-style-key="${filename}"]`) !== null;
     }
 

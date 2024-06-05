@@ -15,7 +15,7 @@ class Page extends Target {
           containerClass: "row",
           data: {
             api: JSON.stringify({
-              url: config.api.baseURL + '/public/api/pages',
+              url: config.api.baseURL + '/api/pages',
               endpoint: '/about.json',
               headers: JSON.stringify({
                 'Content-Type': 'application/json',

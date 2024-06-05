@@ -1,5 +1,4 @@
-import { Target } from "../../Target.js";
-
+import { Target } from "@components/Target";
 class Header extends Target {
   constructor(props, container) {
     super(props, container);

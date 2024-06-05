@@ -21,7 +21,7 @@ class IndexPage extends Target {
           data: {
             name: "Target.js",
             api: JSON.stringify({
-              url: config.api.baseURL + '/public/api/pages',
+              url: config.api.baseURL + '/api/pages',
               endpoint: '/index.json',
               headers: JSON.stringify({
                 'Content-Type': 'application/json',

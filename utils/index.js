@@ -46,7 +46,7 @@ const resolvePath = (filename, path) => {
  * @returns {string} The resolved path to the target file within the 'src/components/' directory
  */
 const componentsPath = (filename) => {
-    return resolvePath(filename, '../src/components/');
+    return resolvePath(filename, './src/components/');
 };
 
 /**

@@ -137,6 +137,14 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Initial render
-  renderPage();
+  if (config.router.isSPAEnabled) {
+    // Initial render
+    renderPage();
+  } else {
+    // Render all targets
+    Object.keys(targetRegistry).forEach(async (targetId) => {
+      const loadTarget = targetRegistry[targetId];
+      await renderTarget(targetId, loadTarget, window.location.pathname, new URLSearchParams(window.location.search));
+    });
+  }
 });

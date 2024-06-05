@@ -1,10 +1,10 @@
-import { Target } from "../../Target.js";
+import { Target } from "@components/Target";
 
 class App extends Target {
   constructor(props, container) {
     super(props, container);
     this.state = {
-      cssFile: "assets/css/app.css",
+      cssFile: "/assets/css/app.css",
       injectsLinks: [
         {
           link: "https://fonts.googleapis.com/css2?family=Reddit+Mono:wght@200..900&display=swap",

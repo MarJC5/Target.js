@@ -1,6 +1,6 @@
-import { HTTPRequest } from "../../utils/HTTPRequest.js";
-import { StyleManager } from "./StyleManager.js";
-import config from "../../target.config.js";
+import { HTTPRequest } from "@utils/HTTPRequest";
+import { StyleManager } from "@components/StyleManager";
+import config from "@/target.config";
 
 /**
  * Utility function to render a target into a DOM container.
@@ -37,7 +37,7 @@ class Target {
     this.styleManager = new StyleManager();
     this.styleId = this.container.getAttribute("data-target-name");
 
-    if (config.logger && this.container) {
+    if (config.logger && config.dev && config.dev && this.container) {
       this.log("Initialized target", { state: this.state, props: this.props, container: this.container });
     }
   }
@@ -116,7 +116,7 @@ class Target {
             });
           }
 
-          if (config.logger && this.container) {
+          if (config.logger && config.dev && this.container) {
             this.log("Created nested target", { element });
           }
 
@@ -164,7 +164,7 @@ class Target {
    * To be overridden in subclasses as needed.
    */
   targetWillMount() {
-    if (config.logger && this.container) {
+    if (config.logger && config.dev && this.container) {
       this.log("Target will mount");
     }
   }
@@ -174,7 +174,7 @@ class Target {
    * To be overridden in subclasses as needed.
    */
   targetDidMount() {
-    if (config.logger && this.container) {
+    if (config.logger && config.dev && this.container) {
       this.log("Target has mounted");
     }
   }
@@ -184,7 +184,7 @@ class Target {
    * To be overridden in subclasses as needed.
    */
   targetDidUpdate() {
-    if (config.logger && this.container) {
+    if (config.logger && config.dev && this.container) {
       this.log("Target did update");
     }
   }
@@ -194,7 +194,7 @@ class Target {
    * To be overridden in subclasses as needed.
    */
   targetWillUnmount() {
-    if (config.logger && this.container) {
+    if (config.logger && config.dev && this.container) {
       this.log("Target will unmount");
     }
   }
@@ -206,7 +206,7 @@ class Target {
    * @returns {string} - HTML string representing the target's UI.
    */
   render() {
-    if (config.logger && this.container) {
+    if (config.logger && config.dev && this.container) {
       this.log("Rendering target");
     }
     return "";
@@ -228,7 +228,7 @@ class Target {
       this.targetDidUpdate();
     }
 
-    if (config.logger && this.container) {
+    if (config.logger && config.dev && this.container) {
       this.log("Target updated");
     }
   }
@@ -237,7 +237,7 @@ class Target {
    * Clears the target's content from its container.
    */
   unmount() {
-    if (config.logger && this.container) {
+    if (config.logger && config.dev && this.container) {
       this.log("Unmounting target");
     }
     this.styleManager.removeAllStyles();
@@ -248,7 +248,7 @@ class Target {
    * Completely removes the target and cleans up resources.
    */
   destroy() {
-    if (config.logger && this.container) {
+    if (config.logger && config.dev && this.container) {
       this.log("Destroying target");
     }
     this.unmount();

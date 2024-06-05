@@ -1,4 +1,4 @@
-import config from "../../target.config.js";
+import config from "@/target.config";
 
 export class HeadManager {
     /**

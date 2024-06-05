@@ -32,7 +32,7 @@ Then, you can explore the source code to see how the targets are defined, loaded
    In your HTML, define container elements with an `id` that matches the keys specified in `router.js`. For example:
 
    ```html
-   <body id="app"></body>
+   <div id="loading" data-message="Loading..."></div>
    ```
 
 3. **Target Registration**:
@@ -129,30 +129,6 @@ Then, you can explore the source code to see how the targets are defined, loaded
      }
      ```
 
-   - **Node.js (Express)**: Add a catch-all route in your server setup:
-
-     ```javascript
-     import express from 'express';
-     import path from 'path';
-     import { fileURLToPath } from 'url';
- 
-     const __filename = fileURLToPath(import.meta.url);
-     const __dirname = path.dirname(__filename);
- 
-     const app = express();
- 
-     app.use(express.static(path.join(__dirname, 'public')));
- 
-     app.get('*', (req, res) => {
-        res.sendFile(path.join(__dirname, 'public', 'index.html'));
-     });
- 
-     const port = process.env.PORT || 3000;
-     app.listen(port, () => {
-        console.log(`Server is running on port ${port}`);
-     });
-     ```
-
 9. **API Integration**:
    Targets can fetch data using the `fetch` method, providing a seamless integration with backend services:
 
@@ -237,9 +213,20 @@ Simply call `main.js` in your HTML file to initialize the framework. The script 
 <script src="path/to/main.js" type="module"></script>
 ```
 
+To optimize the performance of your application, consider the following best practice is to build with `vite` which is already configured to bundle and minify your code.
+
+```bash
+npm run build # or yarn build
+```
+
 ## Development
 
-- **Local Development**: Use a local server to serve your files since this framework relies on ES Modules, which require a server environment.
+- **Local Development**: Use `vite` to run a local development server with hot module reloading for a seamless development experience.
+
+  ```bash
+  npm run dev # or yarn dev
+  ```
+
 - **Debugging**: Utilize browser developer tools to debug issues related to target loading, rendering, and state management.
 
 ## Contributions
