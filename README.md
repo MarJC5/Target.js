@@ -8,6 +8,7 @@ The Target.js framework is a minimalistic approach to creating dynamic web appli
 - **Target Isolation**: Each target manages its own state and lifecycle methods, promoting encapsulation and reusability.
 - **Utility Functions**: Includes helper functions for common tasks like converting dataset strings to objects and generating target paths.
 - **Child Target Rendering**: The framework supports rendering nested child targets dynamically, allowing complex target hierarchies.
+- **Single Page Application (SPA) Mode**: Enable SPA mode to handle client-side navigation without page reloads, improving performance and user experience.
 
 ## Project Structure
 
@@ -25,7 +26,7 @@ Then, you can explore the source code to see how the targets are defined, loaded
 ## Setup and Usage
 
 1. **Include Scripts**:
-   Ensure that `target.js` is included in your HTML file after all necessary DOM elements are defined.
+   Ensure that `main.js` is included in your HTML file after all necessary DOM elements are defined.
 
 2. **Define Containers**:
    In your HTML, define container elements with an `id` that matches the keys specified in `router.js`. For example:
@@ -38,16 +39,16 @@ Then, you can explore the source code to see how the targets are defined, loaded
    In `router.js`, map container IDs to their respective target loader functions. This setup is used by `main.js` to find and load targets dynamically:
 
    ```javascript
-   const containersTarget = {
+   const targetRegistry = {
        "app": () => import("./path/to/YourTarget.js"),
    };
    ```
 
 4. **Create Targets**:
-   Define new targets by extending the `Target` base class into `./src/targets`. Implement required lifecycle methods and the `render` method to define what the target should output. For instance:
+   Define new targets by extending the `Target` base class into `./src/components`. Implement required lifecycle methods and the `render` method to define what the target should output. For instance:
 
    ```javascript
-   import { Target, escapeHTML } from "../Target.js";
+   import { Target } from "../Target.js";
    
    class YourTarget extends Target {
        render() {
@@ -76,7 +77,83 @@ Then, you can explore the source code to see how the targets are defined, loaded
    }
    ```
 
-6. **API Integration**:
+6. **Enable SPA Mode**:
+   To enable SPA mode, update your configuration to set `isSPAEnabled` to `true`. This allows the framework to handle client-side navigation without page reloads.
+
+   ```javascript
+   export default {
+       router: {
+           isSPAEnabled: true,
+       },
+   };
+   ```
+
+7. **Using Links for Navigation**:
+   In SPA mode, you need to use special attributes for links to ensure the framework can handle them. Add the `data-link` attribute to your anchor tags (`<a>`):
+
+   ```html
+   <a href="/about" data-link>About</a>
+   ```
+
+   This will enable the SPA navigation to intercept the clicks and load the content dynamically without reloading the page.
+
+8. **Server Configuration for SPA**:
+   When using SPA mode, configure your server to redirect all requests to `index.html`. This ensures that client-side routing works correctly even when users navigate directly to a URL or refresh the page.
+
+   - **Apache**: Add a `.htaccess` file with the following content:
+
+     ```plaintext
+     <IfModule mod_rewrite.c>
+       RewriteEngine On
+       RewriteBase /
+       RewriteRule ^index\.html$ - [L]
+       RewriteCond %{REQUEST_FILENAME} !-f
+       RewriteCond %{REQUEST_FILENAME} !-d
+       RewriteRule . /index.html [L]
+     </IfModule>
+     ```
+
+   - **Nginx**: Update your server configuration:
+
+     ```nginx
+     server {
+       listen 80;
+       server_name yourdomain.com;
+
+       root /path/to/your/app;
+       index index.html;
+
+       location / {
+         try_files $uri $uri/ /index.html;
+       }
+     }
+     ```
+
+   - **Node.js (Express)**: Add a catch-all route in your server setup:
+
+     ```javascript
+     import express from 'express';
+     import path from 'path';
+     import { fileURLToPath } from 'url';
+ 
+     const __filename = fileURLToPath(import.meta.url);
+     const __dirname = path.dirname(__filename);
+ 
+     const app = express();
+ 
+     app.use(express.static(path.join(__dirname, 'public')));
+ 
+     app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+     });
+ 
+     const port = process.env.PORT || 3000;
+     app.listen(port, () => {
+        console.log(`Server is running on port ${port}`);
+     });
+     ```
+
+9. **API Integration**:
    Targets can fetch data using the `fetch` method, providing a seamless integration with backend services:
 
    ```javascript
@@ -91,7 +168,7 @@ Then, you can explore the source code to see how the targets are defined, loaded
    }
    ```
 
-7. **State Management**:
+10. **State Management**:
     Props and state can be managed within each target to control the rendering logic and data flow. Use `this.setState` to update the state and trigger a re-render:
 
     ```javascript
@@ -133,7 +210,24 @@ Then, you can explore the source code to see how the targets are defined, loaded
     <div data-target-name="your-target" data-props-name="${props}"></div>
     ```
 
-8. **Lifecycle Methods**:
+11. **Lifecycle Methods**:
+    Implement lifecycle methods in your targets to manage setup and teardown logic:
+
+    ```javascript
+    class HelloWorld extends Target {
+        targetDidMount() {
+            // Initialization logic here
+        }
+
+        targetDidUpdate() {
+            // Update logic here
+        }
+
+        unmount() {
+            // Cleanup logic here
+        }
+    }
+    ```
 
 ## Production
 

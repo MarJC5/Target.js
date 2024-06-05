@@ -1,26 +1,69 @@
-import { targetRegistry } from "./router.js";
+import { getPathTargetId } from "./router/index.js";
+import { targetRegistry } from "./router/router.js";
 import { datasetToObject } from "./utils/index.js";
+import config from "./target.config.js";
 
 document.addEventListener("DOMContentLoaded", function () {
   console.log("Target.js is running!");
+  console.log("Single page mode:", config.router.isSPAEnabled);
 
-  const url = window.location;
-  const path = url.pathname;
-  const queryParams = new URLSearchParams(url.search);
+  let currentTargetId = null;
+  let currentTargetInstance = null;
+
+  const renderPage = async () => {
+    const url = window.location;
+    const path = url.pathname;
+    const queryParams = new URLSearchParams(url.search);
+    const targetId = getPathTargetId(path);
+
+    if (targetId !== currentTargetId) {
+      if (currentTargetInstance) {
+        // Unmount the current target instance before rendering the new one
+        currentTargetInstance.unmount();
+      }
+
+      currentTargetId = targetId;
+
+      // Update the body ID
+      document.body.id = targetId;
+
+      // Clear the existing content if needed
+      const container = document.getElementById(targetId);
+      if (container) {
+        container.innerHTML = "";
+      }
+
+      // Does the key exist in the registry?
+      const loadTarget = targetRegistry[targetId];
+      if (loadTarget) {
+        currentTargetInstance = await renderTarget(
+          targetId,
+          loadTarget,
+          path,
+          queryParams
+        );
+      }
+    }
+  };
 
   /**
-   * Render child targets by looking the html string for their root element
+   * Render child targets by looking the HTML string for their root element
    * Look for <target name="target-name"/> inside the parent element and render the target corresponding to the name
    * @param {HTMLElement} parentContainer - The parent container element
+   * @param {string} path - The current path
+   * @param {URLSearchParams} queryParams - The query parameters
    * @returns {Promise<void>}
    */
-  const renderChildTarget = async (parentContainer) => {
-    const elements = parentContainer.querySelectorAll('[data-target-name]');
+  const renderChildTarget = async (parentContainer, path, queryParams) => {
+    const elements = parentContainer.querySelectorAll("[data-target-name]");
     if (elements.length > 0) {
       await Promise.all(
         [...elements].map(async (element) => {
           const targetId = element.getAttribute("data-target-name");
-          const props = datasetToObject({ ...element.dataset, path, queryParams });
+          const props = datasetToObject(element.dataset);
+          props.path = path;
+          props.queryParams = queryParams.toString();
+
           if (targetRegistry[targetId]) {
             try {
               const { default: Target } = await targetRegistry[targetId]();
@@ -28,10 +71,10 @@ document.addEventListener("DOMContentLoaded", function () {
               target.setParent(parentContainer.id);
               target.update();
 
-              // render child targets
-              await renderChildTarget(element);
+              // Render child targets
+              await renderChildTarget(element, path, queryParams);
 
-              // clean up the container
+              // Clean up the container
               target.initialize();
             } catch (error) {
               console.error(`Error loading target ${targetId}:`, error);
@@ -47,38 +90,53 @@ document.addEventListener("DOMContentLoaded", function () {
    * Look for id="target-name" and render the target corresponding to the name
    * @param {string} targetId - The id of the target
    * @param {function} loadTarget - The function to load the target
+   * @param {string} path - The current path
+   * @param {URLSearchParams} queryParams - The query parameters
    * @returns {Promise<void>}
    */
-  const renderTarget = async (targetId, loadTarget) => {
+  const renderTarget = async (targetId, loadTarget, path, queryParams) => {
     const element = document.getElementById(targetId);
 
     if (element) {
-      // load parent target
-      const props = datasetToObject({ ...element.dataset, path, queryParams });
+      // Load parent target
+      const props = datasetToObject(element.dataset);
+      props.path = path;
+      props.queryParams = queryParams.toString();
+
       try {
         const { default: Target } = await loadTarget();
         const target = new Target(props, element);
         target.update();
 
-        // render child targets
-        await renderChildTarget(element);
+        // Render child targets
+        await renderChildTarget(element, path, queryParams);
 
-        // clean up the container
+        // Clean up the container
         target.initialize();
+        return target;
       } catch (error) {
         console.error(`Error loading target ${targetId}:`, error);
       }
     }
+  };
+
+  if (config.router.isSPAEnabled) {
+    const navigateTo = (url) => {
+      history.pushState(null, null, url);
+      renderPage();
+    };
+
+    window.addEventListener("popstate", renderPage);
+
+    // Event delegation for navigation links
+    document.addEventListener("click", (event) => {
+      if (event.target.matches("[data-link]")) {
+        event.preventDefault();
+        navigateTo(event.target.href);
+      }
+    });
   }
 
-  /**
-   * Iterate over the target IDs and render them if their root element exists
-   * This allows us to only load the targets we need on the page
-   */
-  Object.entries(targetRegistry).forEach(async ([id, loadTarget]) => {
-    if (document.getElementById(id)) {
-      // console.info(`Rendering ${id} target`);
-      await renderTarget(id, loadTarget);
-    }
-  });
+  // Initial render
+  renderPage();
 });

@@ -1,10 +1,15 @@
 import { Target } from "../Target.js";
-import config from "../../../target.config.js";
+import { HeadManager } from "../HeadManager.js";
 
-class Page extends Target {
+class Error404 extends Target {
   constructor(props, container) {
     super(props, container);
     this.state = {};
+    this.head = new HeadManager(document.head);
+  }
+
+  targetDidMount() {
+    this.head.setTitle("Error 404 - Page not found");
   }
 
   render() {
@@ -14,13 +19,9 @@ class Page extends Target {
           container: "div",
           containerClass: "row",
           data: {
-            api: JSON.stringify({
-              url: config.api.baseURL + '/public/api/pages',
-              endpoint: '/about.json',
-              headers: JSON.stringify({
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-              }),
+            content: JSON.stringify({
+              title: "Error 404: Page Not Found",
+              content: "The page you are looking for does not exist. Please check the URL and try again."          
             }),
             css: JSON.stringify({}), // Add Inline CSS to the head
             links: JSON.stringify({}), // Add links to the head
@@ -41,4 +42,4 @@ class Page extends Target {
   }
 }
 
-export default Page;
+export default Error404;

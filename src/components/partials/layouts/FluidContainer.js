@@ -1,22 +1,39 @@
 import { Target } from "../../Target.js";
+import { HeadManager } from "../../HeadManager.js";
 
-class HelloWorld extends Target {
+class FluidContainer extends Target {
   constructor(props, container) {
     super(props, container);
+    this.state = {};
     this.state = {
       data: null,
       loading: true,
       error: null,
       fetched: false,
     };
-
     if (this.props.api) {
       this.fetch(this.props.api.url, {}, {...this.props.api.headers});
+    }
+    this.head = new HeadManager(document.head);
+  }
+
+  targetWillMount() {
+    if (this.props.css) {
+      this.styleManager.addStyle(this.styleId, this.props.css);
+    }
+
+    if (this.props.links && this.props.links.length > 0) {
+      this.props.links.forEach((link) => {
+        this.styleManager.injectLinkedStyle(
+          link.link,
+          link.rel,
+          link.crossorigin ? "crossorigin" : ""
+        );
+      });
     }
   }
 
   targetDidMount() {
-    // Example of fetching data from an API
     if (!this.state.fetched && this.props.api) {
       this.api
         .get(this.props.api.endpoint)
@@ -27,6 +44,8 @@ class HelloWorld extends Target {
           console.error("Fetch error:", error.message);
           this.setState({ data: null, loading: false, error: error.message, fetched: true });
         });
+
+      this.head.setTitle(this.state.data ? this.state.data.title : "");
     }
 
     if (!this.props.api && !this.state.fetched) {
@@ -35,16 +54,6 @@ class HelloWorld extends Target {
   }
 
   render() {
-    const html = `
-      <div class="row">
-        <div class="w-half">
-          <h1>Hello, {{name}}</h1>
-          <h2>{{title}}</h2>
-          <p>{{content}}</p>
-        </div>
-      </div>
-    `;
-
     if (this.state.loading) {
       const html = `
         <div data-target-name="loading" data-message='Loading...'></div>
@@ -59,12 +68,12 @@ class HelloWorld extends Target {
       return Target.parseHTML(html, {});
     }
 
-    return Target.parseHTML(html, {
-      name: this.props.name,
-      title: this.state.data ? this.state.data.title : "No title",
-      content: this.state.data ? this.state.data.content : "No content",
-    });
+    if (this.state.data) {
+      return Target.parseHTML(this.props.html, Target.dataToObject(this.state.data));
+    } else {
+      return Target.parseHTML(this.props.html, {});
+    }
   }
 }
 
-export default HelloWorld;
+export default FluidContainer;

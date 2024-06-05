@@ -1,33 +1,33 @@
 import { Target } from "../Target.js";
+import { HeadManager } from "../HeadManager.js";
 import config from "../../../target.config.js";
 
-class Page extends Target {
+class IndexPage extends Target {
   constructor(props, container) {
     super(props, container);
     this.state = {};
+    this.head = new HeadManager(document.head);
+  }
+
+  targetDidMount() {
+    this.head.setTitle("Home");
   }
 
   render() {
     const yieldElement = new Object({
       nestedTargets: {
-        "fluid-container": {
+        "hello-world": {
           container: "div",
-          containerClass: "row",
           data: {
+            name: "Target.js",
             api: JSON.stringify({
               url: config.api.baseURL + '/public/api/pages',
-              endpoint: '/about.json',
+              endpoint: '/index.json',
               headers: JSON.stringify({
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
               }),
             }),
-            css: JSON.stringify({}), // Add Inline CSS to the head
-            links: JSON.stringify({}), // Add links to the head
-            html: Target.minifyHTML(`
-              <h1>{{title}}</h1>
-              <p>{{content}}</p>
-            `),
           },
         },
       },
@@ -41,4 +41,4 @@ class Page extends Target {
   }
 }
 
-export default Page;
+export default IndexPage;

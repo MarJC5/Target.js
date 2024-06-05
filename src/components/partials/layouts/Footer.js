@@ -6,14 +6,8 @@ class Footer extends Target {
     this.state = {};
   }
 
-  targetDidMount() {
-    console.log("Target has mounted: Footer");
-    this.styleManager.addStyle(this.container.id, css);
-  }
-
-  targetDidUpdate() {
-    console.log("Target did update: Footer");
-    this.styleManager.addStyle(this.container.id, css);
+  targetWillMount() {
+    this.styleManager.addStyle(this.styleId, css);
   }
 
   render() {
@@ -23,12 +17,7 @@ class Footer extends Target {
       </div>
     `;
 
-    return Target.parseHTML(html, {
-        copyright: new Date().getFullYear().toString(),
-        title: this.props.content.title,
-        github: this.props.content.github,
-        author: this.props.content.author,
-    });
+    return Target.parseHTML(html, Target.dataToObject(this.props.content));
   }
 }
 

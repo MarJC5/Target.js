@@ -1,3 +1,5 @@
+import config from "../../target.config.js";
+
 export class HeadManager {
     /**
      * @param {Object} head - The head object.
@@ -79,8 +81,12 @@ export class HeadManager {
      * 
      * @param {string} title - The title of the head.
      */
-    setTitle(title) {
-        document.title = title;
+    setTitle(title = config.meta.title) {
+        if (title === config.meta.title) {
+            document.title = title;
+        } else if (title && title !== "") {
+            document.title = `${config.meta.title} | ${title}`;
+        }
 
         return document.title;
     }

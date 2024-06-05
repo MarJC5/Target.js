@@ -11,17 +11,19 @@ const datasetToObject = (data) => {
     return Object.entries(data).reduce((acc, [key, value]) => {
         if (value === "true" || value === "false") {
             acc[key] = value === "true";
-        } else if (typeof value === "object" && value.length > 0) {
-            acc[key] = datasetToObject(value);
         } else if (!isNaN(value)) {
             acc[key] = Number(value);
         } else if (value.startsWith("{") && value.endsWith("}")) {
-            acc[key] = JSON.parse(value);
+            try {
+                acc[key] = JSON.parse(value);
+            } catch (e) {
+                acc[key] = value;
+            }
         } else {
             acc[key] = value;
         }
         return acc;
-    });
+    }, {});
 };
 
 /**
@@ -36,14 +38,15 @@ const resolvePath = (filename, path) => {
 };
 
 /**
- * Generates a path for a target file located in the 'src/targets/' directory.
- * This function utilizes `resolvePath` to construct the full path to a target file.
+ * Generates a path for a target file located in the 'src/components/' directory.
+ * This function utilizes `resolvePath` to construct the full path to a target file. 
+ * This function is used in the router.js file.
  *
  * @param {string} filename - The filename of the target.
- * @returns {string} The resolved path to the target file within the 'src/targets/' directory.
+ * @returns {string} The resolved path to the target file within the 'src/components/' directory
  */
 const componentsPath = (filename) => {
-    return resolvePath(filename, './src/components/');
+    return resolvePath(filename, '../src/components/');
 };
 
 /**
@@ -79,4 +82,14 @@ const urlPath = (path) => {
     return `${window.location.origin}${newPath}`;
 }
 
-export { datasetToObject, componentsPath, assetsPath, urlPath, publicPath };
+/**
+ * Generate nonce for CSP.
+ * 
+ * @returns {string} The nonce string.
+ */
+const generateNonce = () => {
+    const array = new Uint8Array(16);
+    window.crypto.getRandomValues(array);
+    return btoa(String.fromCharCode(...array));
+}
+export { datasetToObject, componentsPath, assetsPath, urlPath, publicPath, generateNonce };

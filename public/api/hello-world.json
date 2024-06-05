@@ -1,4 +1,0 @@
-{
-    "title": "Lets target the right content",
-    "body": "The Target.js framework is a minimalistic approach to creating dynamic web applications similar to React. It involves dynamically loading and rendering targets based on the presence of certain DOM elements that act as containers for these targets. This setup leverages modern JavaScript features such as modules, promises, and async/await to efficiently load only the necessary resources."
-}

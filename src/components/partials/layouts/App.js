@@ -5,55 +5,54 @@ class App extends Target {
     super(props, container);
     this.state = {
       cssFile: "assets/css/app.css",
-      injectsLinks: [{
-        link: "https://fonts.googleapis.com/css2?family=Reddit+Mono:wght@200..900&display=swap",
-        rel: "stylesheet",
-      },
-      {
-        link: "https://fonts.gstatic.com",
-        rel: "preconnect",
-        crossorigin: true,
-      },
-      {
-        googleapis: "https://fonts.googleapis.com",
-        rel: "preconnect",
-
-      }],
+      injectsLinks: [
+        {
+          link: "https://fonts.googleapis.com/css2?family=Reddit+Mono:wght@200..900&display=swap",
+          rel: "stylesheet",
+        },
+        {
+          link: "https://fonts.gstatic.com",
+          rel: "preconnect",
+          crossorigin: true,
+        },
+        {
+          googleapis: "https://fonts.googleapis.com",
+          rel: "preconnect",
+        },
+      ],
     };
   }
 
-  targetDidMount() {
-    console.log("Target has mounted: App");
+  targetWillMount() {
     this.state.injectsLinks.forEach((link) => {
-      this.styleManager.injectLinkedStyle(link.link, link.rel, link.crossorigin ? 'crossorigin' : '');
+      this.styleManager.injectLinkedStyle(
+        link.link,
+        link.rel,
+        link.crossorigin ? "crossorigin" : ""
+      );
     });
     this.styleManager.loadLinkedStyle(this.state.cssFile);
-    this.styleManager.addStyle(this.container.id, css);
-  }
-
-  targetDidUpdate() {
-    console.log("Target did update: App");
-  }
-
-  unmount() {
-    this.state.injectLinkedStyles.forEach((link) => {
-      this.styleManager.removeInjectedLinkedStyle(link.href);
-    });
-    this.styleManager.removeLinkedStyle(this.state.cssFile);
-    this.styleManager.removeStyle(this.container.id);
+    this.styleManager.addStyle(this.styleId, css);
   }
 
   render() {
     const sharedData = new Object({
-        title: "Target.js",
-        github: "https://github.com/MarJC5/target.js",
-    })
+      title: "Target.js",
+      github: "https://github.com/MarJC5/target.js",
+    });
     const html = `
+      <!-- Header -->
       <header data-target-name="header" data-content='${JSON.stringify(sharedData)}'></header>
+      <!-- Main -->
       <main>
         ${this.getNestedTargets(this.props.yield.nestedTargets)}
       </main>
-      <footer data-target-name="footer" data-content='${JSON.stringify({...sharedData, author: 'MarJC5' })}'></footer>
+      <!-- Footer -->
+      <footer data-target-name="footer" data-content='${JSON.stringify({
+        ...sharedData,
+        author: "MarJC5",
+        copyright: new Date().getFullYear().toString(),
+      })}'></footer>
     `;
 
     return Target.parseHTML(html, {});
@@ -67,10 +66,10 @@ const css = {
     font-weight: 400;
     font-style: normal;
   `,
-  'body h1': `
+  "body h1": `
     font-size: var(--text-5xl);
   `,
-  'bodyh2': `
+  "body h2": `
     font-size: var(--text-xl);
   `,
 };
