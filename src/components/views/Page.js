@@ -1,12 +1,10 @@
 import { Target } from "@components/Target";
 import config from "@/target.config";
-import { HeadManager } from "@components/HeadManager";
 
 class Page extends Target {
   constructor(props, container) {
     super(props, container);
     this.state = {};
-    this.head = new HeadManager(document.head);
   }
 
   render() {
@@ -17,8 +15,8 @@ class Page extends Target {
           containerClass: "row",
           data: {
             api: JSON.stringify({
-              url: config.api.baseURL + '/api/pages',
-              endpoint: `${this.props.path}.json`,
+              url: config.api.baseURL + '/api/page',
+              endpoint: config.api.local ? `${this.props.path}.json` : `${this.props.path}`,
               headers: JSON.stringify({
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',

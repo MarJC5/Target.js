@@ -39,7 +39,7 @@ export class HTTPRequest {
         const config = {
             method,
             headers,
-            body: body ? JSON.stringify(body) : undefined
+            body: body ? JSON.stringify(body) : undefined,
         };
 
         // Execute the request

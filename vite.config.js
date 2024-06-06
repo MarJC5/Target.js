@@ -1,7 +1,10 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import mkcert from 'vite-plugin-mkcert';
+import config from './target.config';
 
 export default defineConfig({
+  plugins: [mkcert()],
   root: "./",
   base: "./",
   build: {
@@ -35,6 +38,14 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 5173, // default port for dev
+    proxy: config.api.local ? {} : {
+      '/api': {
+        target: config.baseURL,
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      }
+    }
   },
   preview: {
     host: "0.0.0.0",
