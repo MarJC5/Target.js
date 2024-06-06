@@ -21,10 +21,6 @@ class Loading extends Target {
   }
 }
 
-const css = {
-  ".loading": `
-    display: none;
-  `,
-};
+const css = {};
 
 export default Loading;

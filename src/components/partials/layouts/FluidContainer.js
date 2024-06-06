@@ -44,13 +44,11 @@ class FluidContainer extends Target {
           console.error("Fetch error:", error.message);
           this.setState({ data: null, loading: false, error: error.message, fetched: true });
         });
-
-      this.head.setTitle(this.state.data ? this.state.data.title : "");
     }
 
     if (!this.props.api && !this.state.fetched) {
       this.setState({ loading: false, fetched: true });
-    }
+    }  
   }
 
   render() {
@@ -69,6 +67,10 @@ class FluidContainer extends Target {
     }
 
     if (this.state.data) {
+      if (this.state.data.title) {
+        this.head.setTitle(this.state.data.title);
+      }
+
       return Target.parseHTML(this.props.html, Target.dataToObject(this.state.data));
     } else {
       return Target.parseHTML(this.props.html, {});

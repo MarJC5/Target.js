@@ -207,10 +207,10 @@ Then, you can explore the source code to see how the targets are defined, loaded
 
 ## Production
 
-Simply call `main.js` in your HTML file to initialize the framework. The script will scan the DOM for container elements and load the corresponding targets dynamically. Ensure that all targets are bundled and minified for production use.
+Simply call `target.min.js` in your HTML file to initialize the framework. The script will scan the DOM for container elements and load the corresponding targets dynamically. Ensure that all targets are bundled and minified for production use.
 
 ```html
-<script src="path/to/main.js" type="module"></script>
+<script src="path/to/target.min.js" type="module"></script>
 ```
 
 To optimize the performance of your application, consider the following best practice is to build with `vite` which is already configured to bundle and minify your code.

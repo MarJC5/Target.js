@@ -82,6 +82,10 @@ export class HeadManager {
      * @param {string} title - The title of the head.
      */
     setTitle(title = config.meta.title) {
+        if (!config.router.isSPAEnabled) {
+            return;
+        }
+
         if (title === config.meta.title) {
             document.title = title;
         } else if (title && title !== "") {

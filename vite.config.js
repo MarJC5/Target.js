@@ -15,7 +15,7 @@ export default defineConfig({
         main: resolve(__dirname, "index.html"),
       },
       output: {
-        entryFileNames: "main.js",
+        entryFileNames: "target.min.js",
         chunkFileNames: "assets/js/[name].js",
         assetFileNames: "assets/[ext]/[name].[ext]",
       },

@@ -41,13 +41,10 @@ class App extends Target {
       github: "https://github.com/MarJC5/target.js",
     });
     const html = `
-      <!-- Header -->
       <header data-target-name="header" data-content='${JSON.stringify(sharedData)}'></header>
-      <!-- Main -->
       <main>
         ${this.getNestedTargets(this.props.yield.nestedTargets)}
       </main>
-      <!-- Footer -->
       <footer data-target-name="footer" data-content='${JSON.stringify({
         ...sharedData,
         author: "MarJC5",

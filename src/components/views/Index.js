@@ -1,6 +1,6 @@
-import { Target } from "../Target.js";
-import { HeadManager } from "../HeadManager.js";
-import config from "../../../target.config.js";
+import { Target } from "@components/Target";
+import { HeadManager } from "@components/HeadManager";
+import config from "@/target.config";
 
 class IndexPage extends Target {
   constructor(props, container) {

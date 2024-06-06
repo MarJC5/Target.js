@@ -85,6 +85,14 @@ class Target {
         el.removeAttribute(`data-${key}`);
       });
     });
+
+    // Add comments with the target name for debugging purposes
+    if (config.logger && config.dev) {
+      const start = document.createComment(`Start of ${this.constructor.name}`);
+      const end = document.createComment(`End of ${this.constructor.name}`);
+      this.container.prepend(start);
+      this.container.append(end);
+    }
   }
 
   /**

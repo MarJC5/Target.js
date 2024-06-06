@@ -1,5 +1,5 @@
-import { Target } from "../Target.js";
-import { HeadManager } from "../HeadManager.js";
+import { Target } from "@components/Target";
+import { HeadManager } from "@components/HeadManager.js";
 
 class Error404 extends Target {
   constructor(props, container) {
