@@ -263,50 +263,114 @@ class Target {
     this.container = null;
   }
 
-  /**
-   * Escapes HTML to prevent XSS attacks.
+    /**
+   * Escapes HTML to prevent XSS attacks, optionally allowing certain tags.
    *
    * @param {string} str - The string to escape.
+   * @param {boolean} [allowTags=false] - Whether to allow certain HTML tags.
    * @returns {string} - The escaped HTML string.
    */
-  static escapeHTML(str) {
-    // Check if the argument is a number and convert it to a string
-    if (typeof str === "number") {
-      str = str.toString();
+    static escapeHTML(str, allowTags = false) {
+      if (typeof str === "number") {
+        str = str.toString();
+      }
+  
+      if (typeof str !== "string") {
+        console.error("escapeHTML: Argument is not a string.");
+        return "";
+      }
+  
+      if (allowTags) {
+        // Allow certain HTML tags
+        const allowedTags = {
+          b: [],
+          i: [],
+          u: [],
+          s: [],
+          a: ['href', 'title'],
+          code: [],
+          pre: [],
+          blockquote: [],
+          ul: [],
+          ol: [],
+          li: [],
+          h1: [],
+          h2: [],
+          h3: [],
+          h4: [],
+          h5: [],
+          h6: [],
+          p: [],
+          br: [],
+          hr: [],
+          table: [],
+          thead: [],
+          tbody: [],
+          tfoot: [],
+          tr: [],
+          th: [],
+          td: [],
+          div: [],
+          span: []
+        };
+    
+        // Regex to match allowed tags and their attributes
+        const tagRegex = /<\/?([a-zA-Z]+)([^>]*)>/g;
+        const attrRegex = /([a-zA-Z]+)="([^"]*)"/g;
+    
+        return str.replace(tagRegex, (fullTag, tagName, attrs) => {
+          if (allowedTags[tagName]) {
+            // Allow only specified attributes
+            let safeAttrs = '';
+            let match;
+            while ((match = attrRegex.exec(attrs)) !== null) {
+              const attrName = match[1];
+              const attrValue = match[2];
+              if (allowedTags[tagName].includes(attrName)) {
+                safeAttrs += ` ${attrName}="${Target.escapeHTML(attrValue)}"`;
+              }
+            }
+            return `<${fullTag.startsWith('</') ? '/' : ''}${tagName}${safeAttrs}>`;
+          } else {
+            // Escape the whole tag if it's not allowed
+            return fullTag.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+          }
+        });
+      } else {
+        // Escape all HTML tags
+        return str.replace(
+          /[&<>"']/g,
+          (tag) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            }[tag])
+        );
+      }
     }
-
-    if (typeof str !== "string") {
-      console.error("escapeHTML: Argument is not a string.");
-      return "";
+  
+    /**
+     * Parses a template string with placeholders, replacing them with provided values.
+     *
+     * @param {string} template - The template string containing placeholders.
+     * @param {Object} placeholders - An object mapping placeholders to their values.
+     * @returns {string} - The resulting string with placeholders replaced by actual values.
+     */
+    static parseHTML(template, placeholders = {}) {
+      return template.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+        if (typeof placeholders[key] !== "undefined") {
+          if (key === "content") {
+            return Target.escapeHTML(placeholders[key], true); // Allow certain HTML tags
+          } else {
+            return Target.escapeHTML(placeholders[key]);
+          }
+        }
+        return match; // leave the placeholder intact
+      });
     }
-
-    return str.replace(
-      /[&<>"']/g,
-      (tag) =>
-        ({
-          "&": "&amp;",
-          "<": "&lt;",
-          ">": "&gt;",
-          '"': "&quot;",
-          "'": "&#39;",
-        }[tag])
-    );
-  }
-
-  /**
-   * Parses a template string with placeholders, replacing them with provided values.
-   *
-   * @param {string} template - The template string containing placeholders.
-   * @param {Object} placeholders - An object mapping placeholders to their values.
-   * @returns {string} - The resulting string with placeholders replaced by actual values.
-   */
-  static parseHTML(template, placeholders = {}) {
-    return template.replace(/\{\{(\w+)\}\}/g, (match, key) => {
-      return typeof placeholders[key] !== "undefined"
-        ? Target.escapeHTML(placeholders[key])
-        : match; // leave the placeholder intact
-    });
-  }
 
   /**
    * Helper function to minify HTML strings.

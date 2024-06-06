@@ -26,8 +26,8 @@ class Page extends Target {
             css: JSON.stringify({}), // Add Inline CSS to the head
             links: JSON.stringify({}), // Add links to the head
             html: Target.minifyHTML(`
-              <h1>{{title}}</h1>
-              <p>{{content}}</p>
+              <h1 class="the-title">{{title}}</h1>
+              <div class="the-content">{{content}}</div>
             `),
           },
         },

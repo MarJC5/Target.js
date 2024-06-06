@@ -7,7 +7,13 @@ class Error extends Target {
   }
 
   targetWillMount() {
-    this.styleManager.addStyle(this.styleId, css);
+    if (!this.props.message) {
+      this.props.message = "An error occurred.";
+    }
+
+    if (css) {
+      this.styleManager.addStyle(this.styleId, css);
+    }
   }
 
   render() {

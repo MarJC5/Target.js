@@ -38,9 +38,9 @@ class HelloWorld extends Target {
     const html = `
       <div class="row">
         <div class="w-half">
-          <h1>Hello, {{name}}</h1>
-          <h2>{{title}}</h2>
-          <p>{{content}}</p>
+          <h1 class="the-title">Hello, {{name}}</h1>
+          <h2 class="the-subtitle">{{title}}</h2>
+          <div class="the-content">{{content}}</div>
         </div>
       </div>
     `;
