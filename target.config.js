@@ -7,7 +7,7 @@
  */
 const isPreview = process.env.NODE_ENV === 'preview';
 const isDevelopment = process.env.NODE_ENV === 'development';
-const isLocalApi = false;
+const isLocalApi = true;
 
 /**
  * If you want to make fake api calls, set isLocalMode to true and create a folder called "api" in the public directory, 
@@ -33,6 +33,14 @@ const config = {
     router: {
         // Enable Single Page Application mode (SPA) else it will just target all id="target-name" elements
         isSPAEnabled: true,
+    },
+    auth: {
+        jwt: {
+            refreshToken: {
+                enabled: false,
+                endpoint: "/api/refresh-toke"
+            },
+        },
     },
     meta: {
         title: "Target.js",

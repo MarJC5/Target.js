@@ -11,20 +11,21 @@
 const targetRegistry = {
     // Views
     "index": () => import("../src/components/views/Index.js"),
-    "error-404": () => import("../src/components/views/Error404.js"),
     "page": () => import("../src/components/views/Page.js"),
+    "error-404": () => import("../src/components/views/Error404.js"),
 
-    // Partials
+    // Layouts
     "app": () => import("../src/components/partials/layouts/App.js"),
     "header": () => import("../src/components/partials/layouts/Header.js"),
     "footer": () => import("../src/components/partials/layouts/Footer.js"),
     "fluid-container": () => import("../src/components/partials/layouts/FluidContainer.js"),
 
-    // Targets
-    "hello-world": () => import("../src/components/partials/parts/HelloWorld.js"),
-
     // UI
     "loading": () => import("../src/components/partials/ui/Loading.js"),
+    "error": () => import("../src/components/partials/ui/Error.js"),
+
+    // Targets
+
 };
 
 /**

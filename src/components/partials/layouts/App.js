@@ -1,4 +1,4 @@
-import { Target } from "@components/Target";
+import { Target } from "@core/Target";
 
 class App extends Target {
   constructor(props, container) {
@@ -20,6 +20,20 @@ class App extends Target {
           rel: "preconnect",
         },
       ],
+      inlineCSS: {
+        body: `
+          font-family: "Reddit Mono", monospace;
+          font-optical-sizing: auto;
+          font-weight: 400;
+          font-style: normal;
+        `,
+        "body h1": `
+          font-size: var(--text-5xl);
+        `,
+        "body h2": `
+          font-size: var(--text-xl);
+        `,
+      },
     };
   }
 
@@ -32,7 +46,7 @@ class App extends Target {
       );
     });
     this.styleManager.loadLinkedStyle(this.state.cssFile);
-    this.styleManager.addStyle(this.styleId, css);
+    this.styleManager.addStyle(this.styleId, this.state.inlineCSS, this.hash, this.props.scoped ?? false);
   }
 
   render() {
@@ -40,35 +54,45 @@ class App extends Target {
       title: "Target.js",
       github: "https://github.com/MarJC5/target.js",
     });
-    const html = `
-      <header data-target-name="header" data-content='${JSON.stringify(sharedData)}'></header>
-      <main>
-        ${this.getNestedTargets(this.props.yield.nestedTargets)}
-      </main>
-      <footer data-target-name="footer" data-content='${JSON.stringify({
-        ...sharedData,
-        author: "MarJC5",
-        copyright: new Date().getFullYear().toString(),
-      })}'></footer>
-    `;
+
+    const yieldElements = [
+      {
+        name: "header",
+        config: {
+          container: "header",
+          data: {
+            content: JSON.stringify(sharedData),
+          },
+        },
+      },
+      {
+        name: "fluid-container",
+        config: {
+          container: "main",
+          data: {
+            html: this.getNestedTargets(JSON.parse(this.props.yield)),
+          },
+        },
+      },
+      {
+        name: "footer",
+        config: {
+          container: "footer",
+          data: {
+            content: JSON.stringify({
+              ...sharedData,
+              author: "MarJC5",
+              copyright: new Date().getFullYear().toString(),
+            }),
+          },
+        },
+      },
+    ];
+
+    const html = `${this.getNestedTargets(yieldElements)}`;
 
     return Target.parseHTML(html, {});
   }
 }
-
-const css = {
-  body: `
-    font-family: "Reddit Mono", monospace;
-    font-optical-sizing: auto;
-    font-weight: 400;
-    font-style: normal;
-  `,
-  "body h1": `
-    font-size: var(--text-5xl);
-  `,
-  "body h2": `
-    font-size: var(--text-xl);
-  `,
-};
 
 export default App;

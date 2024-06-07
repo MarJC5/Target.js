@@ -15,9 +15,8 @@ The Target.js framework is a minimalistic approach to creating dynamic web appli
 - `main.js`: The main script that initializes targets when the DOM content is fully loaded. It scans for container IDs and renders targets accordingly.
 - `router.js`: Manages the dynamic importing of targets based on their usage on the page.
 - `utils/index.js`: Provides utility functions such as `datasetToObject` for data manipulation and `componentsPath` for resolving target file paths.
-- `src/components/Target.js`: Contains the base class for creating targets, handling lifecycle methods, state management, and rendering logic.
-- `src/components/partials/parts/HelloWorld.js`: An example target that demonstrates the usage of the framework's target system.
-- `src/components/partials/parts/App.js`: An example target that demonstrates the usage of the framework's target system.
+- `core/Target.js`: Contains the base class for creating targets, handling lifecycle methods, state management, and rendering logic.
+- `src/components/partials/layouts/App.js`: An example target that demonstrates the usage of the framework's target system.
 - `src/components/views/Page.js`: An example target that demonstrates the use of multiple nested child targets within a parent target.
 
 To have a better understanding of the framework, please run a local server and open the `index.html` file in your browser. The example targets will be loaded dynamically based on the container elements defined in the HTML file.

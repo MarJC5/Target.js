@@ -7,6 +7,9 @@ import { pathToTargetId } from "@router/router";
 const patterns = {
     slug: "[a-zA-Z0-9-]+",
     id: "[0-9]+",
+    nonce: "[a-zA-Z0-9]+",
+    query: "[a-zA-Z0-9=&]+",
+    hash: "[a-zA-Z0-9]+",
 };
 
 /**

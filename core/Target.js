@@ -1,5 +1,5 @@
 import { HTTPRequest } from "@utils/HTTPRequest";
-import { StyleManager } from "@components/StyleManager";
+import { StyleManager } from "@core/StyleManager";
 import config from "@/target.config";
 
 /**
@@ -35,35 +35,44 @@ class Target {
     this.api = null;
     this.isMounted = false;
     this.styleManager = new StyleManager();
+    this.hash = this.generateRandomHash();
     this.styleId = this.container.getAttribute("data-target-name");
 
     if (config.logger && config.dev && config.dev && this.container) {
-      this.log("Initialized target", { state: this.state, props: this.props, container: this.container });
+      this.log("Initialized target", {
+        state: this.state,
+        props: this.props,
+        container: this.container,
+      });
     }
   }
 
-   /**
+  /**
    * Logs messages with different colors for each type of message.
    *
    * @param {string} message - The log message.
    * @param {Object} context - Additional context for the log.
    * @param {string} color - The color for the log message.
    */
-   log(message, context = {}) {
+  log(message, context = {}) {
     const colors = {
-      'Initialized target': 'color: #f0fdf4; font-weight: bold',
-      'Target will mount': 'color: #dcfce7; font-weight: bold',
-      'Target did mount': 'color: #bbf7d0; font-weight: bold',
-      'Target has mounted': 'color: #86efac; font-weight: bold',
-      'Target did update': 'color: #4ade80; font-weight: bold',
-      'Target updated': 'color: #22c55e; font-weight: bold',
-      'Target will unmount': 'color: #fb7185; font-weight: bold',
-      'Unmounting target': 'color: #f43f5e; font-weight: bold',
-      'Created nested target': 'color: #06b6d4; font-weight: bold',
+      "Initialized target": "color: #f0fdf4; font-weight: bold",
+      "Target will mount": "color: #dcfce7; font-weight: bold",
+      "Target did mount": "color: #bbf7d0; font-weight: bold",
+      "Target has mounted": "color: #86efac; font-weight: bold",
+      "Target did update": "color: #4ade80; font-weight: bold",
+      "Target updated": "color: #22c55e; font-weight: bold",
+      "Target will unmount": "color: #fb7185; font-weight: bold",
+      "Unmounting target": "color: #f43f5e; font-weight: bold",
+      "Created nested target": "color: #06b6d4; font-weight: bold",
     };
 
-    const titleColor = colors[message] || 'color: #166534; font-weight: bold';
-    console.groupCollapsed(`%c[${this.constructor.name}] ${message}`, titleColor);
+    const titleColor = colors[message] || "color: #166534; font-weight: bold";
+    console.groupCollapsed(
+      `%c[${this.constructor.name} -> ${this.hash}]%c ${message}`,
+      titleColor,
+      "color: #f0fdf4"
+    );
     console.log("State:", this.state);
     console.log("Props:", this.props);
     console.log("Container:", this.container);
@@ -72,7 +81,6 @@ class Target {
     });
     console.groupEnd();
   }
-
 
   /**
    * Initializes the target by extracting data attributes from the container.
@@ -88,11 +96,30 @@ class Target {
 
     // Add comments with the target name for debugging purposes
     if (config.logger && config.dev) {
-      const start = document.createComment(`Start of ${this.constructor.name}`);
-      const end = document.createComment(`End of ${this.constructor.name}`);
+      const start = document.createComment(`Start of ${this.constructor.name} - ${this.hash}`);
+      const end = document.createComment(`End of ${this.constructor.name} - ${this.hash}`);
       this.container.prepend(start);
       this.container.append(end);
     }
+  }
+
+  /**
+   * Generate Random Hash
+   * @returns {string} - A random hash string.
+   */
+  generateRandomHash() {
+    return (
+      Math.random().toString(36).substring(2, 6) +
+      Math.random().toString(36).substring(2, 6)
+    );
+  }
+
+  /**
+   * Get the hash value.
+   * @returns {string} - The hash value.
+   */
+  getHash() {
+    return this.hash;
   }
 
   /**
@@ -110,31 +137,24 @@ class Target {
    */
   getNestedTargets(nestedTargets) {
     if (nestedTargets) {
-      const formatted = [];
-      Object.entries(nestedTargets).reduce((acc, [key, value]) => {
-        if (value) {
-          const element = document.createElement(value.container);
-          element.setAttribute("data-target-name", key);
-          if (value.containerClass) {
-            element.classList.add(value.containerClass);
+      return nestedTargets
+        .map((target) => {
+          const { name, config } = target;
+          const element = document.createElement(config.container);
+          element.setAttribute("data-target-name", name);
+          if (config.containerClass) {
+            element.classList.add(...config.containerClass);
           }
-          if (value.data) {
-            Object.entries(value.data).forEach(([dataKey, dataValue]) => {
+          if (config.data) {
+            Object.entries(config.data).forEach(([dataKey, dataValue]) => {
               element.setAttribute(`data-${dataKey}`, dataValue);
             });
           }
-
-          if (config.logger && config.dev && this.container) {
-            this.log("Created nested target", { element });
-          }
-
-          formatted.push(element.outerHTML);
-        }
-        return acc;
-      }, []);
-
-      return formatted.join(" ");
+          return element.outerHTML;
+        })
+        .join(" ");
     }
+    return "";
   }
 
   /**
@@ -263,114 +283,126 @@ class Target {
     this.container = null;
   }
 
-    /**
+  /**
+   * Parse yield data from the parent target.
+   */
+  yieldElementString(yieldElements) {
+    return  JSON.stringify(yieldElements).replace(
+      /"/g,
+      "&quot;"
+    );;
+  }
+
+  /**
    * Escapes HTML to prevent XSS attacks, optionally allowing certain tags.
    *
    * @param {string} str - The string to escape.
    * @param {boolean} [allowTags=false] - Whether to allow certain HTML tags.
    * @returns {string} - The escaped HTML string.
    */
-    static escapeHTML(str, allowTags = false) {
-      if (typeof str === "number") {
-        str = str.toString();
-      }
-  
-      if (typeof str !== "string") {
-        console.error("escapeHTML: Argument is not a string.");
-        return "";
-      }
-  
-      if (allowTags) {
-        // Allow certain HTML tags
-        const allowedTags = {
-          b: [],
-          i: [],
-          u: [],
-          s: [],
-          a: ['href', 'title'],
-          code: [],
-          pre: [],
-          blockquote: [],
-          ul: [],
-          ol: [],
-          li: [],
-          h1: [],
-          h2: [],
-          h3: [],
-          h4: [],
-          h5: [],
-          h6: [],
-          p: [],
-          br: [],
-          hr: [],
-          table: [],
-          thead: [],
-          tbody: [],
-          tfoot: [],
-          tr: [],
-          th: [],
-          td: [],
-          div: [],
-          span: []
-        };
-    
-        // Regex to match allowed tags and their attributes
-        const tagRegex = /<\/?([a-zA-Z]+)([^>]*)>/g;
-        const attrRegex = /([a-zA-Z]+)="([^"]*)"/g;
-    
-        return str.replace(tagRegex, (fullTag, tagName, attrs) => {
-          if (allowedTags[tagName]) {
-            // Allow only specified attributes
-            let safeAttrs = '';
-            let match;
-            while ((match = attrRegex.exec(attrs)) !== null) {
-              const attrName = match[1];
-              const attrValue = match[2];
-              if (allowedTags[tagName].includes(attrName)) {
-                safeAttrs += ` ${attrName}="${Target.escapeHTML(attrValue)}"`;
-              }
+  static escapeHTML(str, allowTags = false) {
+    if (typeof str === "number") {
+      str = str.toString();
+    }
+
+    if (typeof str !== "string") {
+      console.error("escapeHTML: Argument is not a string.");
+      return "";
+    }
+
+    if (allowTags) {
+      // Allow certain HTML tags
+      const allowedTags = {
+        b: [],
+        i: [],
+        u: [],
+        s: [],
+        a: ["href", "title"],
+        code: [],
+        pre: [],
+        blockquote: [],
+        ul: [],
+        ol: [],
+        li: [],
+        h1: [],
+        h2: [],
+        h3: [],
+        h4: [],
+        h5: [],
+        h6: [],
+        p: [],
+        br: [],
+        hr: [],
+        table: [],
+        thead: [],
+        tbody: [],
+        tfoot: [],
+        tr: [],
+        th: [],
+        td: [],
+        div: [],
+        span: [],
+      };
+
+      // Regex to match allowed tags and their attributes
+      const tagRegex = /<\/?([a-zA-Z]+)([^>]*)>/g;
+      const attrRegex = /([a-zA-Z]+)="([^"]*)"/g;
+
+      return str.replace(tagRegex, (fullTag, tagName, attrs) => {
+        if (allowedTags[tagName]) {
+          // Allow only specified attributes
+          let safeAttrs = "";
+          let match;
+          while ((match = attrRegex.exec(attrs)) !== null) {
+            const attrName = match[1];
+            const attrValue = match[2];
+            if (allowedTags[tagName].includes(attrName)) {
+              safeAttrs += ` ${attrName}="${Target.escapeHTML(attrValue)}"`;
             }
-            return `<${fullTag.startsWith('</') ? '/' : ''}${tagName}${safeAttrs}>`;
-          } else {
-            // Escape the whole tag if it's not allowed
-            return fullTag.replace(/</g, "&lt;").replace(/>/g, "&gt;");
           }
-        });
-      } else {
-        // Escape all HTML tags
-        return str.replace(
-          /[&<>"']/g,
-          (tag) =>
-            ({
-              "&": "&amp;",
-              "<": "&lt;",
-              ">": "&gt;",
-              '"': "&quot;",
-              "'": "&#39;",
-            }[tag])
-        );
-      }
-    }
-  
-    /**
-     * Parses a template string with placeholders, replacing them with provided values.
-     *
-     * @param {string} template - The template string containing placeholders.
-     * @param {Object} placeholders - An object mapping placeholders to their values.
-     * @returns {string} - The resulting string with placeholders replaced by actual values.
-     */
-    static parseHTML(template, placeholders = {}) {
-      return template.replace(/\{\{(\w+)\}\}/g, (match, key) => {
-        if (typeof placeholders[key] !== "undefined") {
-          if (key === "content") {
-            return Target.escapeHTML(placeholders[key], true); // Allow certain HTML tags
-          } else {
-            return Target.escapeHTML(placeholders[key]);
-          }
+          return `<${
+            fullTag.startsWith("</") ? "/" : ""
+          }${tagName}${safeAttrs}>`;
+        } else {
+          // Escape the whole tag if it's not allowed
+          return fullTag.replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
-        return match; // leave the placeholder intact
       });
+    } else {
+      // Escape all HTML tags
+      return str.replace(
+        /[&<>"']/g,
+        (tag) =>
+          ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;",
+          }[tag])
+      );
     }
+  }
+
+  /**
+   * Parses a template string with placeholders, replacing them with provided values.
+   *
+   * @param {string} template - The template string containing placeholders.
+   * @param {Object} placeholders - An object mapping placeholders to their values.
+   * @returns {string} - The resulting string with placeholders replaced by actual values.
+   */
+  static parseHTML(template, placeholders = {}) {
+    return template.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+      if (typeof placeholders[key] !== "undefined") {
+        if (key === "content") {
+          return Target.escapeHTML(placeholders[key], true); // Allow certain HTML tags
+        } else {
+          return Target.escapeHTML(placeholders[key]);
+        }
+      }
+      return match; // leave the placeholder intact
+    });
+  }
 
   /**
    * Helper function to minify HTML strings.
@@ -381,6 +413,26 @@ class Target {
   static minifyHTML = (html) => {
     return html.replace(/\s+/g, " ").trim();
   };
+
+  /**
+   * Adds a suffix to all class names in an HTML string.
+   * This function is useful for scoping CSS to a specific target.
+   * @param {string} html - The HTML string to modify.
+   * @param {string} suffix - The suffix to add to each class name.
+   * @returns {string} - The modified HTML string with suffixed class names.
+   * @example
+   * // Returns '<div class="my-class-suffix"></div>'
+   */
+
+  static scopeCSS(html, suffix) {
+    return html.replace(/class="([^"]*)"/g, (match, classNames) => {
+      const suffixedClassNames = classNames
+        .split(" ")
+        .map((className) => `${className}-${suffix}`)
+        .join(" ");
+      return `class="${suffixedClassNames}"`;
+    });
+  }
 
   /**
    * Converts a dataset object to a regular object.

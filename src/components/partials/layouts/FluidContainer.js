@@ -1,5 +1,5 @@
-import { Target } from "@components/Target";
-import { HeadManager } from "@components/HeadManager";
+import { Target } from "@core/Target";
+import { HeadManager } from "@core/HeadManager";
 
 class FluidContainer extends Target {
   constructor(props, container) {
@@ -19,7 +19,7 @@ class FluidContainer extends Target {
 
   targetWillMount() {
     if (this.props.css) {
-      this.styleManager.addStyle(this.styleId, this.props.css);
+      this.styleManager.addStyle(this.styleId, this.props.css, this.hash, this.props.scoped ?? false);
     }
 
     if (this.props.links && this.props.links.length > 0) {
@@ -66,11 +66,15 @@ class FluidContainer extends Target {
       return Target.parseHTML(html, {});
     }
 
+    // Scoped CSS is a feature that allows you to scope the CSS to the component.
+    if (this.props.scoped) {
+      this.props.html = Target.scopeCSS(this.props.html, this.hash);
+    }
+
     if (this.state.data) {
       if (this.state.data.title) {
         this.head.setTitle(this.state.data.title);
       }
-
       return Target.parseHTML(this.props.html, Target.dataToObject(this.state.data));
     } else {
       return Target.parseHTML(this.props.html, {});

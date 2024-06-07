@@ -1,4 +1,4 @@
-import { Target } from "@components/Target";
+import { Target } from "@core/Target";
 
 class Error extends Target {
   constructor(props, container) {
@@ -10,19 +10,27 @@ class Error extends Target {
     if (!this.props.message) {
       this.props.message = "An error occurred.";
     }
-
-    if (css) {
-      this.styleManager.addStyle(this.styleId, css);
-    }
   }
 
   render() {
-    const html = `
-      <div class="error row">
-        <h1>{{title}}</h1>
-        <p>{{message}}</p>
-      </div>
-    `;
+    const yieldElements = [
+      {
+        name: "fluid-container",
+        config: {
+          container: "div",
+          containerClass: ["error", "row"],
+          data: {
+            css: JSON.stringify({}), // Add Inline CSS to the head
+            html: Target.minifyHTML(`
+              <h1>{{title}}</h1>
+              <p>{{message}}</p>
+            `),
+          },
+        },
+      },
+    ];
+
+    const html = `${this.getNestedTargets(yieldElements)}`;
 
     return Target.parseHTML(html, Target.dataToObject(this.props));
   }

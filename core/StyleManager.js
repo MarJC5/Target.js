@@ -22,23 +22,44 @@ export class StyleManager {
      * @param {string} key - A unique identifier for the target-related style.
      * @param {object} css - The CSS rules to be applied.
      */
-    addStyle(key, css) {
+    addStyle(key, css, hash, scoped = false) {
         if (this.isStyleLoaded(key)) {
             return;
         }
         
         const styleElement = document.createElement('style');
-        styleElement.setAttribute('data-style-key', key);
+        styleElement.setAttribute('data-style-key', key + '-' + hash);
         document.head.appendChild(styleElement);
         this.styles.set(key, styleElement);
-
-        styleElement.innerHTML = Object.entries(css).map(([selector, rules]) => {
-            // Minify the CSS rules & check if the selector is empty
-            rules = rules.replace(/\s*([:;,{])\s*/g, '$1');
-            // Avoid XSS by escaping the selector
-            selector = selector.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            return `${selector} { ${rules} }`;
-        }).join('\n');
+    
+        let cssString = '';
+    
+        Object.entries(css).forEach(([selector, rules]) => {
+            if (selector.startsWith('@media')) {
+                cssString += `${selector} { ${this.processRules(rules, hash, scoped)} }`;
+            } else {
+                if (scoped) {
+                    selector = this.prefixSelector(selector, hash);
+                }
+                cssString += `${selector} { ${rules.replace(/\s*([:;,{])\s*/g, '$1')} }`;
+            }
+        });
+    
+        styleElement.innerHTML = cssString;
+    }
+    
+    processRules(rules, hash, scoped) {
+        return Object.entries(rules).map(([selector, rule]) => {
+            rule = rule.replace(/\s*([:;,{])\s*/g, '$1');
+            if (scoped) {
+                selector = this.prefixSelector(selector, hash);
+            }
+            return `${selector} { ${rule} }`;
+        }).join(' ');
+    }
+    
+    prefixSelector(selector, hash) {
+        return selector.split(',').map(sel => sel.trim() + '-' + hash).join(', ');
     }
 
     /**

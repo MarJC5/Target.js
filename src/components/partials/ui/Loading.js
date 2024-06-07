@@ -1,4 +1,4 @@
-import { Target } from "@components/Target";
+import { Target } from "@core/Target";
 
 class Loading extends Target {
   constructor(props, container) {
@@ -10,23 +10,29 @@ class Loading extends Target {
     if (!this.props.message) {
       this.props.message = "Loading...";
     }
-
-    if (css) {
-      this.styleManager.addStyle(this.styleId, css);
-    }
   }
 
   render() {
-    const html = `
-      <div class="loading row">
-        <p>{{message}}</p>
-      </div>
-    `;
+    const yieldElements = [
+      {
+        name: "fluid-container",
+        config: {
+          container: "div",
+          containerClass: ["loading", "row"],
+          data: {
+            css: JSON.stringify({}), // Add Inline CSS to the head
+            html: Target.minifyHTML(`
+                <p>{{message}}</p>
+            `),
+          },
+        },
+      },
+    ];
+
+    const html = `${this.getNestedTargets(yieldElements)}`;
 
     return Target.parseHTML(html, Target.dataToObject(this.props));
   }
 }
-
-const css = {};
 
 export default Loading;

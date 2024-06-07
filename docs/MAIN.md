@@ -1,15 +1,34 @@
+# main.js Documentation
+
+This script initializes and manages the rendering of targets in a web application, supporting both Single Page Application (SPA) mode and traditional multi-page mode. It dynamically loads and renders targets based on the current URL and DOM structure.
+
+## Usage
+
+### Importing Required Modules
+
+```javascript
 import { getPathTargetId } from "@router";
 import { targetRegistry } from "@router/router";
 import { datasetToObject } from "@utils";
 import config from "@/target.config";
+```
 
+### Initialization on DOMContentLoaded
+
+```javascript
 document.addEventListener("DOMContentLoaded", function () {
   console.log("Target.js is running!");
   console.log("Single page mode:", config.router.isSPAEnabled);
 
   let currentTargetId = null;
   let currentTargetInstance = null;
+```
 
+### Render Page Function
+
+The `renderPage` function is responsible for rendering the appropriate target based on the current URL.
+
+```javascript
   const renderPage = async () => {
     const url = window.location;
     const path = url.pathname;
@@ -45,7 +64,13 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
   };
+```
 
+### Render Child Target Function
+
+The `renderChildTarget` function renders child targets within a parent container by looking for elements with the `data-target-name` attribute.
+
+```javascript
   /**
    * Render child targets by looking the HTML string for their root element
    * Look for <target name="target-name"/> inside the parent element and render the target corresponding to the name
@@ -84,7 +109,13 @@ document.addEventListener("DOMContentLoaded", function () {
       );
     }
   };
+```
 
+### Render Target Function
+
+The `renderTarget` function loads and renders a target based on its ID.
+
+```javascript
   /**
    * Render targets by looking the DOM for their root element
    * Look for id="target-name" and render the target corresponding to the name
@@ -119,7 +150,13 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
   };
+```
 
+### SPA Mode Handling
+
+If SPA mode is enabled, set up navigation handling and initial rendering.
+
+```javascript
   if (config.router.isSPAEnabled) {
     const navigateTo = (url) => {
       history.pushState(null, null, url);
@@ -148,3 +185,22 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 });
+```
+
+## Functions
+
+### `renderPage`
+
+Responsible for determining the current path, identifying the appropriate target, and rendering it. If the target has changed, it unmounts the previous target and loads the new one.
+
+### `renderChildTarget`
+
+Renders child targets within a given parent container by looking for elements with the `data-target-name` attribute and dynamically loading the corresponding target.
+
+### `renderTarget`
+
+Finds the target element in the DOM, loads the target, sets its properties, and renders it. This function also handles rendering child targets within the parent target.
+
+### SPA Mode Handling
+
+When SPA mode is enabled, this script listens for navigation events and dynamically updates the page content without a full page reload. It uses the `history` API to manage browser history and URL changes.
